@@ -1,3 +1,5 @@
 /docker/jenkins/data
+/docker/jenkins/ssh
 /repo/frontend/dist
 node_modules
+*.retry

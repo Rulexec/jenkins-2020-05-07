@@ -23,5 +23,43 @@ pipeline {
 				}
 			}
 		}
+
+		stage('Deploy') {
+			agent {
+				docker {
+					image 'debian-ansible:5'
+					args '-v /etc/passwd:/etc/passwd:ro'
+				}
+			}
+
+			when {
+				allOf {
+					anyOf {
+						branch 'temp'
+					}
+					expression {
+						currentBuild.result == null || currentBuild.result == 'SUCCESS'
+					}
+				}
+
+			}
+
+			environment {
+				HOME = "${env.WORKSPACE}/.jenkinsDeployHome"
+				ANSIBLE_HOST_KEY_CHECKING = 'False'
+			}
+
+			steps {
+				configFileProvider([configFile(fileId: 'ansible_hosts', variable: 'myAnsibleHosts')]) {
+					withCredentials([sshUserPrivateKey(credentialsId: "jenkins-key", keyFileVariable: 'sshFile')]) {
+						sh "ansible-playbook \
+							-i ${myAnsibleHosts} \
+							--key-file ${sshFile} \
+							--extra-vars 'variable_hosts=local_docker' \
+							repo/build-scripts/ansible/deploy.yml"
+					}
+				}
+			}
+		}
 	}
 }
