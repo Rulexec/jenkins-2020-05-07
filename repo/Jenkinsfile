@@ -1,0 +1,27 @@
+pipeline {
+	agent none
+
+	stages {
+		stage('Build') {
+			agent {
+				docker {
+					image 'node:12.16.1-buster'
+				}
+			}
+
+			steps {
+				dir('repo/frontend') {
+					sh 'npm ci'
+					sh 'rm -rf dist'
+					sh 'npm run build'
+				}
+			}
+
+			post {
+				always {
+					archiveArtifacts artifacts: 'repo/frontend/dist/**/*', onlyIfSuccessful: true
+				}
+			}
+		}
+	}
+}
