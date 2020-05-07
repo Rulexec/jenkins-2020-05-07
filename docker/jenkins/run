@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+mkdir -p $DIR/data
+
+DOCKER_GROUP=`getent group docker | sed -E 's/^[^:]+:[^:]+:([0-9]+):.*/\1/'`
+
+docker run --rm --name jenkins \
+	-p 127.0.0.1:8080:8080 \
+	-v $DIR/data:/var/jenkins_home \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v $(which docker):/usr/bin/docker:ro \
+	--group-add $DOCKER_GROUP \
+	jenkins/jenkins:2.230
