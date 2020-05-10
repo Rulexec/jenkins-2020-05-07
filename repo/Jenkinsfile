@@ -35,7 +35,7 @@ pipeline {
 			when {
 				allOf {
 					anyOf {
-						branch 'temp'
+						branch 'develop'
 					}
 					expression {
 						currentBuild.result == null || currentBuild.result == 'SUCCESS'
